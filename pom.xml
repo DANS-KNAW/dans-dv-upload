@@ -19,15 +19,10 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <parent>
-        <groupId>nl.knaw.dans.easy</groupId>
-        <artifactId>dans-core-systems</artifactId>
-        <version>1.0.0-SNAPSHOT</version>
-        <relativePath>../../pom.xml</relativePath>
-    </parent>
-
     <artifactId>dans-dv-upload</artifactId>
     <packaging>pom</packaging>
+    <groupId>dans.knaw.nl</groupId>
+    <version>1.0.0-SNAPSHOT</version>
 
     <name>DANS DV Upload</name>
     <description>Module to package upload-file-to-dataset.py as a shiv package</description>
@@ -55,9 +50,53 @@
                                     pip install --upgrade pip &amp;&amp; \
                                     pip install shiv . &amp;&amp; \
                                     mkdir -p target/bin &amp;&amp; \
-                                    shiv --entry-point dans_dv_upload.upload_file_to_dataset:main --output-file target/bin/dans-dv-upload .
+                                    shiv --entry-point dans_dv_upload.upload_file_to_dataset:main --output-file target/bin/dans-dv-upload.pyz .
                                 </argument>
                             </arguments>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>3.1.0</version>
+                <executions>
+                    <execution>
+                        <id>stage-dist</id>
+                        <phase>package</phase>
+                        <configuration>
+                            <target>
+                                <delete dir="${project.build.directory}/dist"/>
+                                <mkdir dir="${project.build.directory}/dist/dans-dv-upload.pyz"/>
+                                <copy file="${project.build.directory}/bin/dans-dv-upload.pyz" todir="${project.build.directory}/dist/dans-dv-upload"/>
+                                <copy file="${basedir}/dans-dv-upload-gui" todir="${project.build.directory}/dist/dans-dv-upload"/>
+                                <copy file="${basedir}/dans-dv-upload-gui.bat" todir="${project.build.directory}/dist/dans-dv-upload"/>
+                                <copy file="${basedir}/README.md" todir="${project.build.directory}/dist/dans-dv-upload" failonerror="false"/>
+                                <copy file="${basedir}/LICENSE" todir="${project.build.directory}/dist/dans-dv-upload" failonerror="false"/>
+                            </target>
+                        </configuration>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>3.6.0</version>
+                <executions>
+                    <execution>
+                        <id>make-zip-tar</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                        <configuration>
+                            <descriptors>
+                                <descriptor>src/assembly/distribution.xml</descriptor>
+                            </descriptors>
                         </configuration>
                     </execution>
                 </executions>

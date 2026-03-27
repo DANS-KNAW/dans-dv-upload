@@ -7,9 +7,18 @@ import mimetypes
 import os
 import requests
 import shutil
+import sys
 import yaml
 
 from logging import config as logconfig
+
+try:
+    import tkinter as tk
+    from tkinter import filedialog, messagebox
+except ImportError:
+    tk = None
+    filedialog = None
+    messagebox = None
 
 example_config = """
 dataverse:
@@ -187,13 +196,37 @@ def main():
     logconfig.dictConfig(config['logging'])
 
     parser = argparse.ArgumentParser(description="Upload a file to a Dataverse dataset.")
-    parser.add_argument("doi", help="DOI of the dataset")
-    parser.add_argument("file", help="Path to the file to upload")
+    parser.add_argument("doi", nargs="?", help="DOI of the dataset")
+    parser.add_argument("file", nargs="?", help="Path to the file to upload")
     parser.add_argument("--directory-label", help="Directory label for the file in the dataset")
     parser.add_argument("--resume", action="store_true", help="Resume a previously started upload")
     parser.add_argument("--skip-checksum-on-resume", action="store_true", help="Skip SHA-1 checksum verification when resuming")
     parser.add_argument("--keep-upload-state", action="store_true", help="Keep the state file after a successful upload")
-    args = parser.parse_args()
+    parser.add_argument("--gui", action="store_true", help="Force GUI mode (show file dialog and DOI prompt)")
+
+    # UI/CLI hybrid logic
+    args, unknown = parser.parse_known_args()
+    if args.gui:
+        if tk is None or filedialog is None:
+            print("tkinter is not available. Please run from the command line.")
+            sys.exit(2)
+        root = tk.Tk()
+        root.withdraw()
+        file_path = filedialog.askopenfilename(title="Select file to upload")
+        if not file_path:
+            print("No file selected. Exiting.")
+            sys.exit(0)
+        doi = tk.simpledialog.askstring("DOI", "Enter the DOI of the dataset:")
+        if not doi:
+            print("No DOI entered. Exiting.")
+            sys.exit(0)
+        args.file = file_path
+        args.doi = doi
+    else:
+        if not args.doi or not args.file:
+            parser.print_usage()
+            print("\nBoth DOI and file must be specified in CLI mode.")
+            sys.exit(2)
 
     dataverse_url = config['dataverse']['url']
     api_key = config['dataverse']['api_key']

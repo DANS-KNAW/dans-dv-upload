@@ -1,0 +1,24 @@
+Starting file upload process.
+Requesting upload URLs from Dataverse.
+Received upload URLs from Dataverse.
+Uploading file to S3.
+Single-part upload URL: https://objectstore.surf.nl/store/10.5072/TLS/GNB9VD/19d2fc67cff-56988d55d383?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20260327T145030Z&X-Amz-SignedHeaders=host%3Bx-amz-tagging&X-Amz-Credential=d435a47bea274511aaba429bf7801629%2F20260327%2Fdataverse%2Fs3%2Faws4_request&X-Amz-Expires=3599&X-Amz-Signature=a3c89e9e3b0d843c702d3a9bf49c2b4b069e85d9885ab92b85fc64bffc781dd1
+File uploaded to S3 successfully.
+Registering file in Dataverse dataset.
+JSON data for registration: {'description': '', 'label': 'astronomy-3071492_960_720-3816366013.jpg', 'directoryLabel': None, 'storageIdentifier': 'surf-direct-upload://store:19d2fc67cff-56988d55d383', 'fileName': 'astronomy-3071492_960_720-3816366013.jpg', 'mimeType': 'image/jpeg', 'checksum': {'@type': 'SHA-1', '@value': '6bb738f9762480b98746199363af9e65814ada35'}}
+{"status":"OK","data":{"files":[{"description":"","label":"astronomy-3071492_960_720-3816366013.jpg","restricted":false,"version":1,"datasetVersionId":4,"dataFile":{"id":22,"persistentId":"","filename":"astronomy-3071492_960_720-3816366013.jpg","contentType":"image/jpeg","friendlyType":"JPEG Image","filesize":137543,"description":"","storageIdentifier":"surf-direct-upload://store:19d2fc67cff-56988d55d383","rootDataFileId":-1,"checksum":{"type":"SHA-1","value":"6bb738f9762480b98746199363af9e65814ada35"},"tabularData":false,"creationDate":"2026-03-27","lastUpdateTime":"2026-03-27T14:50:30Z","fileAccessRequest":true}}]}}
+File registered in Dataverse dataset successfully with MIME type: image/jpeg.
+Upload state file astronomy-3071492_960_720-3816366013.jpg-upload-state.json deleted
+File upload process completed successfully.
+Starting file upload process.
+Requesting upload URLs from Dataverse.
+Received upload URLs from Dataverse.
+Uploading file to S3.
+Single-part upload URL: https://objectstore.surf.nl/store/10.5072/TLS/GNB9VD/19d2fcbccf6-1ada150b95b7?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20260327T145618Z&X-Amz-SignedHeaders=host%3Bx-amz-tagging&X-Amz-Credential=d435a47bea274511aaba429bf7801629%2F20260327%2Fdataverse%2Fs3%2Faws4_request&X-Amz-Expires=3599&X-Amz-Signature=beaf8bd9ae19a557856344ef592a2efbc49f415823413b4346b7b13f698006fd
+File uploaded to S3 successfully.
+Registering file in Dataverse dataset.
+JSON data for registration: {'description': '', 'label': 'orion-nebula-space-galaxy.jpg', 'directoryLabel': None, 'storageIdentifier': 'surf-direct-upload://store:19d2fcbccf6-1ada150b95b7', 'fileName': 'orion-nebula-space-galaxy.jpg', 'mimeType': 'image/jpeg', 'checksum': {'@type': 'SHA-1', '@value': '120e186aef4cda27cbb19ec91f28ff7f11450eb2'}}
+{"status":"OK","data":{"files":[{"description":"","label":"orion-nebula-space-galaxy.jpg","restricted":false,"version":1,"datasetVersionId":4,"dataFile":{"id":23,"persistentId":"","filename":"orion-nebula-space-galaxy.jpg","contentType":"image/jpeg","friendlyType":"JPEG Image","filesize":394239,"description":"","storageIdentifier":"surf-direct-upload://store:19d2fcbccf6-1ada150b95b7","rootDataFileId":-1,"checksum":{"type":"SHA-1","value":"120e186aef4cda27cbb19ec91f28ff7f11450eb2"},"tabularData":false,"creationDate":"2026-03-27","lastUpdateTime":"2026-03-27T14:56:18Z","fileAccessRequest":true}}]}}
+File registered in Dataverse dataset successfully with MIME type: image/jpeg.
+Upload state file orion-nebula-space-galaxy.jpg-upload-state.json deleted
+File upload process completed successfully.
