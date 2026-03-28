@@ -13,3 +13,6 @@ target/venv/
 
 # Build outputs
 target/
+
+/*-upload-state.json
+/venv
