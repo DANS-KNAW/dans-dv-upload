@@ -7,16 +7,10 @@ from logging import config as logconfig
 
 from .config import read_config, ensure_configuration_file_exists
 from .dataverse import get_upload_urls, register_file
+from .gui import combined_gui_dialog
 from .s3_upload import upload_file_to_s3, load_state, write_state
 from .util import calculate_checksum
 
-try:
-    import tkinter as tk
-    from tkinter import filedialog, messagebox
-except ImportError:
-    tk = None
-    filedialog = None
-    messagebox = None
 
 def get_args():
     parser = argparse.ArgumentParser(description="Upload a file to a Dataverse dataset.")
@@ -31,19 +25,12 @@ def get_args():
 
 def handle_ui_cli_logic(parser, args):
     if args.gui:
-        if tk is None or filedialog is None:
-            print("tkinter is not available. Please run from the command line.")
-            sys.exit(2)
-        root = tk.Tk()
-        root.withdraw()
-        file_path = filedialog.askopenfilename(title="Select file to upload")
-        if not file_path:
-            print("No file selected. Exiting.")
+        file_path, doi = combined_gui_dialog()
+        
+        if file_path is None or doi is None:
+            print("Required information missing or GUI not available. Exiting.")
             sys.exit(0)
-        doi = tk.simpledialog.askstring("DOI", "Enter the DOI of the dataset:")
-        if not doi:
-            print("No DOI entered. Exiting.")
-            sys.exit(0)
+            
         args.file = file_path
         args.doi = doi
     else:
