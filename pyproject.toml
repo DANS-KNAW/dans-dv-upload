@@ -10,6 +10,9 @@ dependencies = [
     "pyyaml",
 ]
 
+[project.scripts]
+dv-upload = "dans_dv_upload.upload_file_to_dataset:main"
+
 [tool.setuptools.package-dir]
 "" = "src/main/python"
 
