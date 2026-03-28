@@ -9,11 +9,11 @@ except ImportError:
     filedialog = None
     messagebox = None
 
-def combined_gui_dialog():
+def combined_gui_dialog(dataverses, default_dataverse_name):
     if tk is None:
-        return None, None
+        return None, None, None
 
-    results = {"file": None, "doi": None}
+    results = {"file": None, "doi": None, "dataverse": None}
 
     def browse_file():
         path = filedialog.askopenfilename(
@@ -26,6 +26,8 @@ def combined_gui_dialog():
     def submit():
         file_path = file_var.get().strip()
         doi = doi_var.get().strip()
+        label = dataverse_var.get()
+        dataverse_name = next((dv['name'] for dv in dataverses if dv['label'] == label), None)
 
         if not doi:
             messagebox.showerror("Error", "Please enter a DOI.")
@@ -33,9 +35,13 @@ def combined_gui_dialog():
         if not file_path:
             messagebox.showerror("Error", "Please select a file.")
             return
+        if not dataverse_name:
+            messagebox.showerror("Error", "Please select a dataverse.")
+            return
 
         results["file"] = file_path
         results["doi"] = doi
+        results["dataverse"] = dataverse_name
         root.destroy()
 
     root = tk.Tk()
@@ -43,17 +49,30 @@ def combined_gui_dialog():
 
     doi_var = tk.StringVar()
     file_var = tk.StringVar()
+    dataverse_var = tk.StringVar()
 
-    # Reversed order: DOI first
-    tk.Label(root, text="Dataset DOI").grid(row=0, column=0, sticky="w", padx=5, pady=5)
-    tk.Entry(root, textvariable=doi_var, width=50).grid(row=0, column=1, padx=5, pady=5)
+    # Dataverse selection
+    labels = [dv['label'] for dv in dataverses]
+    default_label = next((dv['label'] for dv in dataverses if dv['name'] == default_dataverse_name),
+                         labels[0] if labels else "")
+    dataverse_var.set(default_label)
 
-    # File second
-    tk.Label(root, text="File").grid(row=1, column=0, sticky="w", padx=5, pady=5)
-    tk.Entry(root, textvariable=file_var, width=50).grid(row=1, column=1, padx=5, pady=5)
-    tk.Button(root, text="Browse...", command=browse_file).grid(row=1, column=2, padx=5, pady=5)
+    tk.Label(root, text="Dataverse").grid(row=0, column=0, sticky="w", padx=5, pady=5)
+    if labels:
+        tk.OptionMenu(root, dataverse_var, *labels).grid(row=0, column=1, sticky="ew", padx=5, pady=5)
+    else:
+        tk.Entry(root, textvariable=dataverse_var, state='disabled', width=50).grid(row=0, column=1, padx=5, pady=5)
 
-    tk.Button(root, text="Submit", command=submit).grid(row=2, column=1, pady=10)
+    # DOI
+    tk.Label(root, text="Dataset DOI").grid(row=1, column=0, sticky="w", padx=5, pady=5)
+    tk.Entry(root, textvariable=doi_var, width=50).grid(row=1, column=1, padx=5, pady=5)
+
+    # File
+    tk.Label(root, text="File").grid(row=2, column=0, sticky="w", padx=5, pady=5)
+    tk.Entry(root, textvariable=file_var, width=50).grid(row=2, column=1, padx=5, pady=5)
+    tk.Button(root, text="Browse...", command=browse_file).grid(row=2, column=2, padx=5, pady=5)
+
+    tk.Button(root, text="Submit", command=submit).grid(row=3, column=1, pady=10)
 
     # Center the window
     root.update_idletasks()
@@ -64,4 +83,4 @@ def combined_gui_dialog():
     root.geometry('{}x{}+{}+{}'.format(width, height, x, y))
 
     root.mainloop()
-    return results["file"], results["doi"]
+    return results["file"], results["doi"], results["dataverse"]

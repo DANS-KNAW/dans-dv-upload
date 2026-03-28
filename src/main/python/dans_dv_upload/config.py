@@ -2,9 +2,17 @@ import os
 import yaml
 
 EXAMPLE_CONFIG = """
-dataverse:
-  url: changeme
-  api_key: changeme
+dataverses:
+  - name: test_archaeology
+    label: Data Station Archaeology (Test)
+    url: changeme
+    api_key: changeme
+  - name: test_ssh
+    label: Data Station SSH (Test)
+    url: changeme
+    api_key: changeme
+    
+default_dataverse: test_archaeology    
 
 logging:
   version: 1

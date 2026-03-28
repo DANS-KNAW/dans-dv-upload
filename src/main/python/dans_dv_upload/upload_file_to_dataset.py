@@ -16,6 +16,7 @@ def get_args():
     parser = argparse.ArgumentParser(description="Upload a file to a Dataverse dataset.")
     parser.add_argument("doi", nargs="?", help="DOI of the dataset")
     parser.add_argument("file", nargs="?", help="Path to the file to upload")
+    parser.add_argument("--dataverse", help="Dataverse instance to upload to (name as defined in config.yml)")
     parser.add_argument("--directory-label", help="Directory label for the file in the dataset")
     parser.add_argument("--resume", action="store_true", help="Resume a previously started upload")
     parser.add_argument("--skip-checksum-on-resume", action="store_true", help="Skip SHA-1 checksum verification when resuming")
@@ -23,21 +24,24 @@ def get_args():
     parser.add_argument("--gui", action="store_true", help="Force GUI mode (show file dialog and DOI prompt)")
     return parser, parser.parse_known_args()
 
-def handle_ui_cli_logic(parser, args):
+def handle_ui_cli_logic(parser, args, config):
     if args.gui:
-        file_path, doi = combined_gui_dialog()
+        file_path, doi, dataverse_name = combined_gui_dialog(config.get('dataverses', []), config.get('default_dataverse'))
         
-        if file_path is None or doi is None:
+        if file_path is None or doi is None or dataverse_name is None:
             print("Required information missing or GUI not available. Exiting.")
             sys.exit(0)
             
         args.file = file_path
         args.doi = doi
+        args.dataverse = dataverse_name
     else:
         if not args.doi or not args.file:
             parser.print_usage()
             print("\nBoth DOI and file must be specified in CLI mode.")
             sys.exit(2)
+        if not args.dataverse:
+            args.dataverse = config.get('default_dataverse')
     return args
 
 def main():
@@ -46,10 +50,18 @@ def main():
     logconfig.dictConfig(config['logging'])
 
     parser, (args, unknown) = get_args()
-    args = handle_ui_cli_logic(parser, args)
+    args = handle_ui_cli_logic(parser, args, config)
 
-    dataverse_url = config['dataverse']['url']
-    api_key = config['dataverse']['api_key']
+    dataverses = config.get('dataverses', [])
+    dataverse = next((dv for dv in dataverses if dv['name'] == args.dataverse), None)
+
+    if not dataverse:
+        logging.error("Dataverse instance '{}' not found in configuration.".format(args.dataverse))
+        print("Dataverse instance '{}' not found in configuration.".format(args.dataverse))
+        sys.exit(1)
+
+    dataverse_url = dataverse['url']
+    api_key = dataverse['api_key']
     file_path = args.file
     doi = args.doi
 
