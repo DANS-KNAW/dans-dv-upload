@@ -72,6 +72,7 @@
                                 <copy file="${project.build.directory}/bin/dans-dv-upload.pyz" todir="${project.build.directory}/dist/dans-dv-upload"/>
                                 <copy file="${basedir}/dans-dv-upload-gui" todir="${project.build.directory}/dist/dans-dv-upload"/>
                                 <copy file="${basedir}/dans-dv-upload-gui.bat" todir="${project.build.directory}/dist/dans-dv-upload"/>
+                                <copy file="${basedir}/dans-dv-upload-gui.vbs" todir="${project.build.directory}/dist/dans-dv-upload"/>
                                 <copy file="${basedir}/README.md" todir="${project.build.directory}/dist/dans-dv-upload" failonerror="false"/>
                                 <copy file="${basedir}/LICENSE" todir="${project.build.directory}/dist/dans-dv-upload" failonerror="false"/>
                             </target>
