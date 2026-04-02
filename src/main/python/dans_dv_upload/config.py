@@ -28,7 +28,7 @@ logging:
       level: DEBUG
     file:
       class: logging.FileHandler
-      filename: upload-file-to-dataset-config.log
+      filename: dv-upload.log
       level: DEBUG
   formatters:
     std_out:
@@ -37,8 +37,8 @@ logging:
 """
 
 def ensure_configuration_file_exists():
-    home_config_path = os.path.expanduser('~/.upload-file-to-dataset.yml')
-    cwd_config_path = './upload-file-to-dataset.yml'
+    home_config_path = os.path.expanduser('~/.dv-upload.yml')
+    cwd_config_path = './.dv-upload.yml'
     if os.path.exists(home_config_path):
         config_path = home_config_path
     elif os.path.exists(cwd_config_path):
@@ -52,8 +52,8 @@ def ensure_configuration_file_exists():
         exit(1)
 
 def read_config():
-    home_config_path = os.path.expanduser('~/.upload-file-to-dataset.yml')
-    cwd_config_path = './upload-file-to-dataset.yml'
+    home_config_path = os.path.expanduser('~/.dv-upload.yml')
+    cwd_config_path = './.dv-upload.yml'
 
     if os.path.exists(home_config_path):
         config_path = home_config_path

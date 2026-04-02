@@ -16,5 +16,6 @@ target/
 
 /*-upload-state.json
 /venv
+/.venv
 /*.iml
 /.idea
