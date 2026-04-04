@@ -7,7 +7,7 @@ from logging import config as logconfig
 
 from .config import read_config, ensure_configuration_file_exists
 from .dataverse import get_upload_urls, register_file
-from .gui import combined_gui_dialog
+from .gui import combined_gui_dialog, show_finished_message
 from .s3_upload import upload_file_to_s3, load_state, write_state
 from .util import calculate_checksum
 
@@ -26,15 +26,15 @@ def get_args():
 
 def handle_ui_cli_logic(parser, args, config):
     if args.gui:
-        file_path, doi, dataverse_name = combined_gui_dialog(config.get('dataverses', []), config.get('default_dataverse'))
+        file_path, doi, dataverse_name, gui_progress_callback, gui_root = combined_gui_dialog(config.get('dataverses', []), config.get('default_dataverse'))
         
         if file_path is None or doi is None or dataverse_name is None:
-            print("Required information missing or GUI not available. Exiting.")
-            sys.exit(0)
+            return None, None, None
             
         args.file = file_path
         args.doi = doi
         args.dataverse = dataverse_name
+        return args, gui_progress_callback, gui_root
     else:
         if not args.doi or not args.file:
             parser.print_usage()
@@ -42,7 +42,7 @@ def handle_ui_cli_logic(parser, args, config):
             sys.exit(2)
         if not args.dataverse:
             args.dataverse = config.get('default_dataverse')
-    return args
+    return args, None, None
 
 def main():
     ensure_configuration_file_exists()
@@ -56,7 +56,10 @@ def main():
     logconfig.dictConfig(config['logging'])
 
     parser, (args, unknown) = get_args()
-    args = handle_ui_cli_logic(parser, args, config)
+    args, gui_progress_callback, gui_root = handle_ui_cli_logic(parser, args, config)
+
+    if args is None:
+        sys.exit(0)
 
     dataverses = config.get('dataverses', [])
     dataverse = next((dv for dv in dataverses if dv['name'] == args.dataverse), None)
@@ -116,7 +119,7 @@ def main():
         state['upload_urls'] = upload_urls
         write_state(state_file_path, state)
 
-    upload_file_to_s3(dataverse_url, api_key, state, state_file_path, file_path)
+    upload_file_to_s3(dataverse_url, api_key, state, state_file_path, file_path, progress_callback=gui_progress_callback)
     register_file(dataverse_url, api_key, doi, file_path, args.directory_label, state['upload_urls']['storageIdentifier'], state['sha1_checksum'])
 
     if not args.keep_upload_state:
@@ -124,6 +127,9 @@ def main():
         logging.info("Upload state file {} deleted".format(state_file_path))
 
     logging.info("File upload process completed successfully.")
+
+    if args.gui and gui_root:
+        show_finished_message(gui_root)
 
 if __name__ == "__main__":
     main()

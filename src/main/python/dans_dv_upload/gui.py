@@ -3,11 +3,12 @@ import logging
 
 try:
     import tkinter as tk
-    from tkinter import filedialog, messagebox
+    from tkinter import filedialog, messagebox, ttk
 except ImportError:
     tk = None
     filedialog = None
     messagebox = None
+    ttk = None
 
 def combined_gui_dialog(dataverses, default_dataverse_name):
     if tk is None:
@@ -42,7 +43,23 @@ def combined_gui_dialog(dataverses, default_dataverse_name):
         results["file"] = file_path
         results["doi"] = doi
         results["dataverse"] = dataverse_name
-        root.destroy()
+        
+        # Switch to progress view
+        for child in root.winfo_children():
+            child.grid_forget()
+        
+        tk.Label(root, text="Uploading file...").grid(row=0, column=0, padx=20, pady=10)
+        progress_bar = ttk.Progressbar(root, orient="horizontal", length=300, mode="determinate")
+        progress_bar.grid(row=1, column=0, padx=20, pady=10)
+        
+        def update_progress(current, total):
+            if total > 0:
+                percent = (current / total) * 100
+                progress_bar["value"] = percent
+                root.update_idletasks()
+
+        results["update_progress"] = update_progress
+        root.quit() # Exit mainloop but keep window alive
 
     root = tk.Tk()
     root.title("Upload file to dataset")
@@ -83,4 +100,9 @@ def combined_gui_dialog(dataverses, default_dataverse_name):
     root.geometry('{}x{}+{}+{}'.format(width, height, x, y))
 
     root.mainloop()
-    return results["file"], results["doi"], results["dataverse"]
+    return results["file"], results["doi"], results["dataverse"], results.get("update_progress"), root
+
+def show_finished_message(root):
+    if tk is not None:
+        messagebox.showinfo("Finished", "Finished")
+        root.destroy()
