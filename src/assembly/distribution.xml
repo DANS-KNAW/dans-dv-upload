@@ -10,10 +10,25 @@
     <baseDirectory>dans-dv-upload</baseDirectory>
     <fileSets>
         <fileSet>
-            <directory>${project.build.directory}/dist/dans-dv-upload</directory>
+            <directory>${project.build.directory}/bin</directory>
             <outputDirectory>/</outputDirectory>
             <includes>
                 <include>*</include>
+            </includes>
+        </fileSet>
+        <fileSet>
+            <directory>src/assembly/dist</directory>
+            <outputDirectory>/</outputDirectory>
+            <includes>
+                <include>*</include>
+            </includes>
+        </fileSet>
+        <fileSet>
+            <directory>${project.basedir}</directory>
+            <outputDirectory>/</outputDirectory>
+            <includes>
+                <include>LICENSE</include>
+                <include>README.md</include>
             </includes>
         </fileSet>
     </fileSets>
