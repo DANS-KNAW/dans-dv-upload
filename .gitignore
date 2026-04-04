@@ -16,3 +16,4 @@ __pycache__/
 /.venv
 /*.iml
 /.idea
+/dv-upload.log

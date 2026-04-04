@@ -47,6 +47,12 @@ def handle_ui_cli_logic(parser, args, config):
 def main():
     ensure_configuration_file_exists()
     config = read_config()
+
+    # Expand path to log file to support ~
+    logfile = config['logging']['handlers']['file']['filename']
+    logfile = os.path.expanduser(logfile)
+    config['logging']['handlers']['file']['filename'] = logfile
+
     logconfig.dictConfig(config['logging'])
 
     parser, (args, unknown) = get_args()

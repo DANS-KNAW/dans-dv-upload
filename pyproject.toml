@@ -11,7 +11,7 @@ dependencies = [
 ]
 
 [project.scripts]
-dv-upload = "dans_dv_upload.upload_file_to_dataset:main"
+dv-upload = "dans_dv_upload.dv_upload:main"
 
 [tool.setuptools.package-dir]
 "" = "src/main/python"
