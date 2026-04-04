@@ -7,7 +7,7 @@ from logging import config as logconfig
 
 from .config import read_config, ensure_configuration_file_exists
 from .dataverse import get_upload_urls, register_file
-from .gui import combined_gui_dialog, show_finished_message
+from .gui import combined_gui_dialog, show_finished_message, show_error_message
 from .s3_upload import upload_file_to_s3, load_state, write_state
 from .util import calculate_checksum
 
@@ -24,17 +24,20 @@ def get_args():
     parser.add_argument("--gui", action="store_true", help="Force GUI mode (show file dialog and DOI prompt)")
     return parser, parser.parse_known_args()
 
-def handle_ui_cli_logic(parser, args, config):
+def handle_ui_cli_logic(parser, args, config, gui_root=None):
     if args.gui:
-        file_path, doi, dataverse_name, gui_progress_callback, gui_root = combined_gui_dialog(config.get('dataverses', []), config.get('default_dataverse'))
+        # Use args here because it has the --gui flag
+        file_path, doi, dataverse_name, gui_progress_callback, gui_root = combined_gui_dialog(
+            config.get('dataverses', []), config.get('default_dataverse'), root=gui_root)
         
         if file_path is None or doi is None or dataverse_name is None:
             return None, None, None
             
-        args.file = file_path
-        args.doi = doi
-        args.dataverse = dataverse_name
-        return args, gui_progress_callback, gui_root
+        current_args = argparse.Namespace(**vars(args))
+        current_args.file = file_path
+        current_args.doi = doi
+        current_args.dataverse = dataverse_name
+        return current_args, gui_progress_callback, gui_root
     else:
         if not args.doi or not args.file:
             parser.print_usage()
@@ -56,80 +59,106 @@ def main():
     logconfig.dictConfig(config['logging'])
 
     parser, (args, unknown) = get_args()
-    args, gui_progress_callback, gui_root = handle_ui_cli_logic(parser, args, config)
+    
+    gui_root = None
+    while True:
+        current_args, gui_progress_callback, gui_root = handle_ui_cli_logic(parser, args, config, gui_root=gui_root)
 
-    if args is None:
-        sys.exit(0)
+        if current_args is None:
+            if gui_root:
+                gui_root.destroy()
+            sys.exit(0)
 
-    dataverses = config.get('dataverses', [])
-    dataverse = next((dv for dv in dataverses if dv['name'] == args.dataverse), None)
+        dataverses = config.get('dataverses', [])
+        dataverse = next((dv for dv in dataverses if dv['name'] == current_args.dataverse), None)
 
-    if not dataverse:
-        logging.error("Dataverse instance '{}' not found in configuration.".format(args.dataverse))
-        print("Dataverse instance '{}' not found in configuration.".format(args.dataverse))
-        sys.exit(1)
+        if not dataverse:
+            logging.error("Dataverse instance '{}' not found in configuration.".format(current_args.dataverse))
+            print("Dataverse instance '{}' not found in configuration.".format(current_args.dataverse))
+            if args.gui:
+                continue # Let user try again? Or exit?
+            else:
+                sys.exit(1)
 
-    dataverse_url = dataverse['url']
-    api_key = dataverse['api_key']
-    file_path = args.file
-    doi = args.doi
+        dataverse_url = dataverse['url']
+        api_key = dataverse['api_key']
+        file_path = current_args.file
+        doi = current_args.doi
 
-    if not os.path.exists(file_path):
-        logging.error("File not found: {}".format(file_path))
-        raise FileNotFoundError("File not found: {}".format(file_path))
+        if not os.path.exists(file_path):
+            logging.error("File not found: {}".format(file_path))
+            # In GUI mode, maybe show an error and return to dialog?
+            if args.gui:
+                show_error_message("Error", "File not found: {}".format(file_path))
+                continue
+            else:
+                raise FileNotFoundError("File not found: {}".format(file_path))
 
-    state_file_path = os.path.basename(file_path) + "-upload-state.json"
+        state_file_path = os.path.basename(file_path) + "-upload-state.json"
 
-    if os.path.exists(state_file_path) and not args.resume:
-        logging.error("Upload state file already exists: {}. Either delete it or specify --resume to continue the upload.".format(state_file_path))
-        exit(1)
-
-    if args.resume and not os.path.exists(state_file_path):
-        logging.error("Upload state file not found: {}".format(state_file_path))
-        exit(1)
-
-    if args.resume:
-        logging.info("Resuming upload from {}...".format(state_file_path))
-        state = load_state(state_file_path)
-        if state['file'] != os.path.abspath(file_path):
-            logging.error("File in upload state ({}) does not match file specified on command line ({})".format(state['file'], os.path.abspath(file_path)))
-            exit(1)
-        if state['file_size'] != os.path.getsize(file_path):
-            logging.error("File size in upload state does not match actual file size")
-            exit(1)
-        if not args.skip_checksum_on_resume:
-            sha1_checksum = calculate_checksum(file_path)
-            if sha1_checksum != state['sha1_checksum']:
-                logging.error("SHA-1 checksum in upload state does not match actual file checksum")
+        if os.path.exists(state_file_path) and not current_args.resume:
+            msg = "Upload state file already exists: {}. Either delete it or specify --resume to continue the upload.".format(state_file_path)
+            logging.error(msg)
+            if args.gui:
+                show_error_message("Error", msg)
+                continue
+            else:
                 exit(1)
-    else:
-        logging.info("Starting file upload process.")
-        file_size = os.path.getsize(file_path)
-        sha1_checksum = calculate_checksum(file_path)
-        state = {
-            'file': os.path.abspath(file_path),
-            'file_size': file_size,
-            'sha1_checksum': sha1_checksum,
-            'etags': {},
-            'upload_urls': None
-        }
 
-    if state['upload_urls'] is None:
-        upload_urls = get_upload_urls(dataverse_url, api_key, doi, state['file_size'])
-        state['upload_urls'] = upload_urls
-        write_state(state_file_path, state)
+        if current_args.resume and not os.path.exists(state_file_path):
+            msg = "Upload state file not found: {}".format(state_file_path)
+            logging.error(msg)
+            if args.gui:
+                show_error_message("Error", msg)
+                continue
+            else:
+                exit(1)
 
-    upload_file_to_s3(dataverse_url, api_key, state, state_file_path, file_path, progress_callback=gui_progress_callback)
-    register_file(dataverse_url, api_key, doi, file_path, args.directory_label, state['upload_urls']['storageIdentifier'], state['sha1_checksum'])
+        if current_args.resume:
+            logging.info("Resuming upload from {}...".format(state_file_path))
+            state = load_state(state_file_path)
+            if state['file'] != os.path.abspath(file_path):
+                logging.error("File in upload state ({}) does not match file specified on command line ({})".format(state['file'], os.path.abspath(file_path)))
+                exit(1)
+            if state['file_size'] != os.path.getsize(file_path):
+                logging.error("File size in upload state does not match actual file size")
+                exit(1)
+            if not current_args.skip_checksum_on_resume:
+                sha1_checksum = calculate_checksum(file_path)
+                if sha1_checksum != state['sha1_checksum']:
+                    logging.error("SHA-1 checksum in upload state does not match actual file checksum")
+                    exit(1)
+        else:
+            logging.info("Starting file upload process.")
+            file_size = os.path.getsize(file_path)
+            sha1_checksum = calculate_checksum(file_path)
+            state = {
+                'file': os.path.abspath(file_path),
+                'file_size': file_size,
+                'sha1_checksum': sha1_checksum,
+                'etags': {},
+                'upload_urls': None
+            }
 
-    if not args.keep_upload_state:
-        os.remove(state_file_path)
-        logging.info("Upload state file {} deleted".format(state_file_path))
+        if state['upload_urls'] is None:
+            upload_urls = get_upload_urls(dataverse_url, api_key, doi, state['file_size'])
+            state['upload_urls'] = upload_urls
+            write_state(state_file_path, state)
 
-    logging.info("File upload process completed successfully.")
+        upload_file_to_s3(dataverse_url, api_key, state, state_file_path, file_path, progress_callback=gui_progress_callback)
+        register_file(dataverse_url, api_key, doi, file_path, current_args.directory_label, state['upload_urls']['storageIdentifier'], state['sha1_checksum'])
 
-    if args.gui and gui_root:
-        show_finished_message(gui_root)
+        if not current_args.keep_upload_state:
+            os.remove(state_file_path)
+            logging.info("Upload state file {} deleted".format(state_file_path))
+
+        logging.info("File upload process completed successfully.")
+
+        if args.gui and gui_root:
+            show_finished_message(gui_root)
+        else:
+            # If not in GUI mode, finish after one upload
+            break
 
 if __name__ == "__main__":
     main()

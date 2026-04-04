@@ -10,11 +10,23 @@ except ImportError:
     messagebox = None
     ttk = None
 
-def combined_gui_dialog(dataverses, default_dataverse_name):
+def combined_gui_dialog(dataverses, default_dataverse_name, root=None):
     if tk is None:
         return None, None, None
 
     results = {"file": None, "doi": None, "dataverse": None}
+
+    if root is None:
+        root = tk.Tk()
+        root.title("Upload file to dataset")
+    else:
+        # Clear existing widgets
+        for child in root.winfo_children():
+            child.destroy()
+    
+    doi_var = tk.StringVar()
+    file_var = tk.StringVar()
+    dataverse_var = tk.StringVar()
 
     def browse_file():
         path = filedialog.askopenfilename(
@@ -60,15 +72,6 @@ def combined_gui_dialog(dataverses, default_dataverse_name):
 
         results["update_progress"] = update_progress
         root.quit() # Exit mainloop but keep window alive
-
-    root = tk.Tk()
-    root.title("Upload file to dataset")
-
-    doi_var = tk.StringVar()
-    file_var = tk.StringVar()
-    dataverse_var = tk.StringVar()
-
-    # Dataverse selection
     labels = [dv['label'] for dv in dataverses]
     default_label = next((dv['label'] for dv in dataverses if dv['name'] == default_dataverse_name),
                          labels[0] if labels else "")
@@ -91,18 +94,22 @@ def combined_gui_dialog(dataverses, default_dataverse_name):
 
     tk.Button(root, text="Submit", command=submit).grid(row=3, column=1, pady=10)
 
-    # Center the window
-    root.update_idletasks()
-    width = root.winfo_width()
-    height = root.winfo_height()
-    x = (root.winfo_screenwidth() // 2) - (width // 2)
-    y = (root.winfo_screenheight() // 2) - (height // 2)
-    root.geometry('{}x{}+{}+{}'.format(width, height, x, y))
+    # Center the window only if it's new
+    if root.winfo_viewable() == 0:
+        root.update_idletasks()
+        width = root.winfo_width()
+        height = root.winfo_height()
+        x = (root.winfo_screenwidth() // 2) - (width // 2)
+        y = (root.winfo_screenheight() // 2) - (height // 2)
+        root.geometry('{}x{}+{}+{}'.format(width, height, x, y))
 
     root.mainloop()
     return results["file"], results["doi"], results["dataverse"], results.get("update_progress"), root
 
+def show_error_message(title, message):
+    if tk is not None:
+        messagebox.showerror(title, message)
+
 def show_finished_message(root):
     if tk is not None:
         messagebox.showinfo("Finished", "Finished")
-        root.destroy()
