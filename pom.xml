@@ -55,6 +55,20 @@
                             </arguments>
                         </configuration>
                     </execution>
+                    <execution>
+                        <id>make-windows-installer</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>sh</executable>
+                            <workingDirectory>${project.basedir}</workingDirectory>
+                            <arguments>
+                                <argument>make-windows-installer.sh</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
                 </executions>
             </plugin>
             <plugin>
