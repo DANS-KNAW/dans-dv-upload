@@ -81,20 +81,6 @@
                             <goal>run</goal>
                         </goals>
                     </execution>
-                    <execution>
-                        <id>build-windows-installer</id>
-                        <phase>package</phase>
-                        <configuration>
-                            <target>
-                                <exec executable="bash" failonerror="true">
-                                    <arg value="${basedir}/packaging/windows/make-installer.sh"/>
-                                </exec>
-                            </target>
-                        </configuration>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                    </execution>
                 </executions>
             </plugin>
             <plugin>
