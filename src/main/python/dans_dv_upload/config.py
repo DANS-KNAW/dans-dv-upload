@@ -4,13 +4,22 @@ import sys
 import textwrap
 import yaml
 
+config_version = 1
 
 def ensure_configuration_file_exists():
     home_config_path = os.path.expanduser('~/.dv-upload.yml')
     if os.path.exists(home_config_path):
-        return
+        with open(home_config_path, 'r') as f:
+            config = yaml.safe_load(f)
+            if config and config.get('version') == config_version:
+                return
+        
+        backup_path = os.path.expanduser('~/.dv-upload.bak')
+        shutil.copy(home_config_path, backup_path)
 
-    example_config = textwrap.dedent("""
+    example_config = textwrap.dedent(f"""
+        version: {config_version}
+    
         dataverses:
           - name: archaeology
             label: Data Station Archaeology
@@ -55,7 +64,7 @@ def ensure_configuration_file_exists():
             std_out:
               format: "%(asctime)s : %(levelname)s : %(funcName)s : %(message)s"
               datefmt: "%Y-%m-%d %I:%M:%S"
-""")
+""").strip()
     with open(home_config_path, 'w') as f:
         f.write(example_config)
 
