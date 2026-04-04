@@ -4,15 +4,12 @@ __pycache__/
 *$py.class
 
 # Distribution / packaging
-build/
-dist/
+/build/
+/dist/
 *.egg-info/
 
-# Virtual environments
-target/venv/
-
 # Build outputs
-target/
+/target/
 
 /*-upload-state.json
 /venv

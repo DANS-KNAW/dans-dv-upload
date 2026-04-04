@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+# Portable helper script to start dans-dv-upload in GUI mode
+
+DIR="$(cd "$(dirname "$0")" && pwd)"
+
+if [ -f "$DIR/dans-dv-upload.pyz" ]; then
+    exec python3 "$DIR/dans-dv-upload.pyz" --gui
+else
+    echo "Could not find dans-dv-upload.pyz in $DIR. Please ensure it is present." >&2
+    exit 1
+fi

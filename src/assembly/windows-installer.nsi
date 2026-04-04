@@ -15,5 +15,6 @@ Section
   SetOutPath "$INSTDIR"
   File /r "dist\*"
   File /r "..\..\target\bin\*"
+  CreateShortcut "$DESKTOP\dans-dv-upload-gui.lnk" "$INSTDIR\dans-dv-upload-gui.vbs"
 SectionEnd
 
