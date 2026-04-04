@@ -1,0 +1,5 @@
+;!@Install@!UTF-8!
+Title="DANS DV Upload installation"
+InstallPath="%%LOCALAPPDATA%%\\Programs\\dans-dv-upload"
+RunProgram="dans-dv-upload-gui.vbs"
+;!@InstallEnd@!
