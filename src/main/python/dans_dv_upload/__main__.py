@@ -1,4 +1,4 @@
-from .upload_file_to_dataset import main
+from .dv_upload import main
 
 if __name__ == "__main__":
     main()
