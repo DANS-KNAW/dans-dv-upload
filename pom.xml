@@ -27,6 +27,13 @@
   <name>DANS DV Upload</name>
   <description>Module to package upload-file-to-dataset.py as a shiv package</description>
 
+  <scm>
+    <connection>scm:git:https://github.com/DANS-KNAW/${project.artifactId}</connection>
+    <developerConnection>scm:git:ssh://github.com/DANS-KNAW/${project.artifactId}</developerConnection>
+    <tag>HEAD</tag>
+    <url>https://github.com/DANS-KNAW/${project.artifactId}</url>
+  </scm>
+
   <build>
     <plugins>
       <plugin>
