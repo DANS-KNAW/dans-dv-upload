@@ -28,8 +28,8 @@
   <description>Module to package upload-file-to-dataset.py as a shiv package</description>
 
   <scm>
-    <connection>scm:git:https://github.com/DANS-KNAW/${project.artifactId}</connection>
-    <developerConnection>scm:git:ssh://github.com/DANS-KNAW/${project.artifactId}</developerConnection>
+    <connection>scm:git:https://github.com/DANS-KNAW/dans-dv-upload</connection>
+    <developerConnection>scm:git:ssh://github.com/DANS-KNAW/dans-dv-upload</developerConnection>
     <tag>HEAD</tag>
     <url>https://github.com/DANS-KNAW/${project.artifactId}</url>
   </scm>
