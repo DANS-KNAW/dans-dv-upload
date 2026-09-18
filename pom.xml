@@ -34,12 +34,17 @@
     <url>https://github.com/DANS-KNAW/dans-dv-upload</url>
   </scm>
 
+  <properties>
+    <exec-maven-plugin.version>3.1.0</exec-maven-plugin.version>
+    <maven-assembly-plugin.version>3.6.0</maven-assembly-plugin.version>
+  </properties>
+
   <build>
     <plugins>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>exec-maven-plugin</artifactId>
-        <version>3.1.0</version>
+        <version>${exec-maven-plugin.version}</version>
         <executions>
           <execution>
             <id>package-shiv</id>
@@ -79,7 +84,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-assembly-plugin</artifactId>
-        <version>3.6.0</version>
+        <version>${maven-assembly-plugin.version}</version>
         <executions>
           <execution>
             <id>make-zip-tar</id>
