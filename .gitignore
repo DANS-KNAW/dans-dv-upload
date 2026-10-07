@@ -17,3 +17,4 @@ __pycache__/
 /*.iml
 /.idea
 /dv-upload.log
+/__pycache__*
